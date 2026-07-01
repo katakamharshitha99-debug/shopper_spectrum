@@ -2,29 +2,6 @@ import streamlit as st
 import pandas as pd
 import pickle
 import plotly.express as px
-
-import os
-import gdown
-
-# Download files from Google Drive
-FILES = {
-    "similarity.pkl": "1NsgLnRDIsiWi8JhVzoXw78vYxqx8jo8a",
-    "kmeans.pkl": "...",
-    "scaler.pkl": "...",
-    "clean_data.csv": "...",
-    "online_retail.csv": "..."
-}
-
-for filename, file_id in FILES.items():
-    if not os.path.exists(filename):
-        gdown.download(
-            f"https://drive.google.com/uc?id={file_id}",
-            filename,
-            quiet=False
-        )
-
-
-import streamlit as st
 import os
 import gdown
 
@@ -39,7 +16,17 @@ FILES = {
 for filename, file_id in FILES.items():
     if not os.path.exists(filename):
         url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, filename, quiet=False)
+        gdown.download(url, filename, quiet=False, fuzzy=True)
+
+st.set_page_config(
+    page_title="🛒 Shopper Spectrum",
+    page_icon="🛍️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+fuzzy=True
+
 
 st.set_page_config(
     page_title="🛒 Shopper Spectrum",
