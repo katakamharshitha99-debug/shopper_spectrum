@@ -5,19 +5,6 @@ import plotly.express as px
 import os
 import gdown
 
-FILES = {
-    "clean_data.csv": "1Gy04M8teC0eS3Tv8C8mhTiVdEDUm7nrB",
-    "online_retail.csv": "1u4HR4sDjsh7GIwEVr_Z5iGoPaF_L0WMD",
-    "kmeans.pkl": "1aNNkqM-U9zLUCjXGBdpeeZUig673bkld",
-    "scaler.pkl": "11LR4-Xt4ACsmcWUfJC35QqmtPGU-SEr8",
-    "similarity.pkl": "1NsgLnRDIsiWi8JhVzoXw78vYxqx8jo8a"
-}
-
-for filename, file_id in FILES.items():
-    if not os.path.exists(filename):
-        url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, filename, quiet=False, fuzzy=True)
-
 st.set_page_config(
     page_title="🛒 Shopper Spectrum",
     page_icon="🛍️",
@@ -25,15 +12,33 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-fuzzy=True
+# ---------------------------------------------------------
+# Only similarity.pkl needs to be downloaded from Drive.
+# clean_data.csv, online_retail.csv, kmeans.pkl and scaler.pkl
+# are small enough to commit directly to the repo — do that
+# instead of pulling them from Drive on every app boot.
+# ---------------------------------------------------------
+SIMILARITY_FILE_ID = "1NsgLnRDIsiWi8JhVzoXw78vYxqx8jo8a"
+SIMILARITY_FILENAME = "similarity.pkl"
 
+if not os.path.exists(SIMILARITY_FILENAME):
+    try:
+        gdown.download(
+            id=SIMILARITY_FILE_ID,
+            output=SIMILARITY_FILENAME,
+            quiet=False
+        )
+    except Exception as e:
+        st.error(
+            f"Could not download {SIMILARITY_FILENAME} from Google Drive. "
+            f"Make sure the file's sharing setting is 'Anyone with the link'. "
+            f"Error: {e}"
+        )
+        st.stop()
 
-st.set_page_config(
-    page_title="🛒 Shopper Spectrum",
-    page_icon="🛍️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+if not os.path.exists(SIMILARITY_FILENAME):
+    st.error(f"{SIMILARITY_FILENAME} was not found after download attempt.")
+    st.stop()
 
 # Load data
 df = pd.read_csv("clean_data.csv")
@@ -58,7 +63,7 @@ with open("scaler.pkl", "rb") as f:
 
 with open("similarity.pkl", "rb") as f:
     similarity = pickle.load(f)
-    
+
 # Sidebar
 
 st.sidebar.image(
@@ -91,12 +96,10 @@ if menu == "Home":
     with col4:
         st.metric("Revenue", round(df["TotalPrice"].sum(), 2))
 
-
     with st.expander("Dataset Information"):
         st.write(df.head())
         st.write(df.describe())
-        
-        
+
 # ---------------- EDA DASHBOARD ----------------
 elif menu == "EDA Dashboard":
 
@@ -137,27 +140,27 @@ elif menu == "EDA Dashboard":
     sales = df.groupby("Month")["TotalPrice"].sum()
 
     fig3 = px.line(
-    x=sales.index.astype(str),
-    y=sales.values,
-    title="Monthly Sales"
+        x=sales.index.astype(str),
+        y=sales.values,
+        title="Monthly Sales"
     )
 
     st.plotly_chart(fig3, use_container_width=True)
-    
+
     revenue = df.groupby("Country")["TotalPrice"].sum().sort_values(ascending=False).head(10)
 
     fig4 = px.bar(
-    revenue,
-    title="Revenue by Country"
-)
+        revenue,
+        title="Revenue by Country"
+    )
 
     st.plotly_chart(fig4, use_container_width=True)
 
     st.markdown("---")
     st.markdown(
-    "<center>Created by <b>Himarshitha</b></center>",
-    unsafe_allow_html=True
-)
+        "<center>Created by <b>Himarshitha</b></center>",
+        unsafe_allow_html=True
+    )
 
 # ---------------- CUSTOMER SEGMENTATION ----------------
 elif menu == "Customer Segmentation":
@@ -168,27 +171,22 @@ elif menu == "Customer Segmentation":
     r = st.number_input("Recency")
     f = st.number_input("Frequency")
     m = st.number_input("Monetary")
-    
+
     st.markdown("---")
     st.markdown(
-    "<center>Created by <b>Himarshitha</b></center>",
-    unsafe_allow_html=True
-)
+        "<center>Created by <b>Himarshitha</b></center>",
+        unsafe_allow_html=True
+    )
 
-
-     
 # ---------------- PRODUCT RECOMMENDATION ----------------
 elif menu == "Product Recommendation":
 
     st.header("Product Recommendation")
     st.success("Top 5 Recommended Products")
 
-    # We'll add recommendation code here later
-    
     product = st.text_input("Enter Product Name")
     if st.button("Recommend"):
-        # Load the similarity matrix
-        similarity_df = pickle.load(open("similarity.pkl", "rb"))
+        similarity_df = similarity  # already loaded above
 
         if product in similarity_df.index:
             recommendations = similarity_df[product].sort_values(ascending=False).head(5)
@@ -197,10 +195,9 @@ elif menu == "Product Recommendation":
                 st.write(f"{i}. {prod} (Similarity Score: {score:.2f})")
         else:
             st.write("Product not found in the dataset.")
-            
-            st.title("About Project")
 
-
+st.markdown("---")
+st.title("About Project")
 
 st.write("""
 Shopper Spectrum is an E-Commerce analytics application.
@@ -218,12 +215,17 @@ Features:
 ✔ KMeans Clustering
 """)
 
-col1,col2 = st.columns(2)
-
-st.metric("Customers", df["CustomerID"].nunique())
 with st.container():
-    st.write("The dataset contains a total of 541,909 rows and 8 columns. It is a transactional dataset that captures the details of each transaction made by customers in an online retail store. The dataset is useful for various analyses, including customer segmentation, product recommendation, and sales trend analysis.")
+    st.metric("Customers", df["CustomerID"].nunique())
+    st.write(
+        "The dataset contains a total of 541,909 rows and 8 columns. "
+        "It is a transactional dataset that captures the details of each "
+        "transaction made by customers in an online retail store. The dataset "
+        "is useful for various analyses, including customer segmentation, "
+        "product recommendation, and sales trend analysis."
+    )
     st.markdown("---")
+
 st.markdown(
     "<center>Created by <b>Himarshitha</b></center>",
     unsafe_allow_html=True
