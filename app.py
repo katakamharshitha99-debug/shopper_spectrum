@@ -4,7 +4,21 @@ import pickle
 import plotly.express as px
 
 from shopperspectrum import recommend
+import os
+import gdown
 
+FILES = {
+    "clean_data.csv": "1Gy04M8teC0eS3Tv8C8mhTiVdEDUm7nrB",
+    "online_retail.csv": "1u4HR4sDjsh7GIwEVr_Z5iGoPaF_L0WMD",
+    "kmeans.pkl": "1aNNkqM-U9zLUCjXGBdpeeZUig673bkld",
+    "scaler.pkl": "11LR4-Xt4ACsmcWUfJC35QqmtPGU-SEr8",
+    "similarity.pkl": "1NsgLnRDIsiWi8JhVzoXw78vYxqx8jo8a"
+}
+
+for filename, file_id in FILES.items():
+    if not os.path.exists(filename):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, filename, quiet=False)
 
 st.set_page_config(
     page_title="🛒 Shopper Spectrum",
