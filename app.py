@@ -3,7 +3,28 @@ import pandas as pd
 import pickle
 import plotly.express as px
 
-from shopperspectrum import recommend
+import os
+import gdown
+
+# Download files from Google Drive
+FILES = {
+    "similarity.pkl": "1NsgLnRDIsiWi8JhVzoXw78vYxqx8jo8a",
+    "kmeans.pkl": "...",
+    "scaler.pkl": "...",
+    "clean_data.csv": "...",
+    "online_retail.csv": "..."
+}
+
+for filename, file_id in FILES.items():
+    if not os.path.exists(filename):
+        gdown.download(
+            f"https://drive.google.com/uc?id={file_id}",
+            filename,
+            quiet=False
+        )
+
+
+import streamlit as st
 import os
 import gdown
 
