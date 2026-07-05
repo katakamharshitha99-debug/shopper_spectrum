@@ -1,13 +1,35 @@
 # Shopper Spectrum
 
-Customer Segmentation and Product Recommendation System
+Shopper Spectrum is an E-Commerce analytics application that performs customer segmentation using RFM analysis and KMeans clustering while providing product recommendations using cosine similarity.
 
-## Features
 
-- Customer Segmentation
-- Product Recommendation
-- Interactive Dashboard
-- RFM Analysis
-- KMeans Clustering
+# Features
+✅ Dashboard
 
-Developed using Streamlit.
+✅ EDA
+
+✅ Customer Segmentation
+
+✅ Product Recommendation
+
+✅ Business Insights
+
+# Technologies
+Python
+
+Streamlit
+
+Pandas
+
+NumPy
+
+Plotly
+
+Scikit-learn
+
+# Installation
+git clone ...
+
+pip install -r requirements.txt
+
+streamlit run app.py
